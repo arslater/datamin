@@ -22,4 +22,11 @@ test_set={}
 
 list_set_length(test_list,test_set)
 
-## 3:	
+## 3:
+def set_intersect(S,T):
+	return {x+0 for x in S for y in T if x==y}
+		
+print(set_intersect({1,2,3,4},{3,4,5,6}))		
+
+## 4:
+
