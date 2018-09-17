@@ -34,3 +34,12 @@ def three_tuples(S):
 
 print(three_tuples({-4,-2,1,2,5,0}))
 
+
+## 5:
+def dict_init():
+	## 5a:
+	mydict = {'Neo':'Keanu', 'Morpheus':'Laurence', 'Trinity':'Carrie-Anne'}
+	return mydict
+def dict_find(dlist, k):
+	print( dlist[k] for k in dlist )
+dict_find(dict_init, 'Neo')
