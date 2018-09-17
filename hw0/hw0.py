@@ -29,4 +29,8 @@ def set_intersect(S,T):
 print(set_intersect({1,2,3,4},{3,4,5,6}))		
 
 ## 4:
+def three_tuples(S):
+	return [ (i,j,k) for i in S for j in S for k in S if i+j+k==0]
+
+print(three_tuples({-4,-2,1,2,5,0}))
 
