@@ -51,3 +51,6 @@ mast_dict.append(food_dict)
 print(dict_find(mast_dict,'pizza'))
 
 ## 6
+def file_line_count(infile):
+	return(sum(1 for line in open(infile)))
+print(file_line_count('stories.txt'))
