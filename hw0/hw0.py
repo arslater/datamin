@@ -41,5 +41,18 @@ def dict_init():
 	mydict = {'Neo':'Keanu', 'Morpheus':'Laurence', 'Trinity':'Carrie-Anne'}
 	return mydict
 def dict_find(dlist, k):
-	print( dlist[k] for k in dlist )
-dict_find(dict_init, 'Neo')
+	return {dlist[i] for i in dlist if dlist[i].get(k) == k}
+print (dict_find([('cat':'fluffy','dog':'fido','fish':'swimmy')],[('pizza':'italian'),('toast':'french')],'pizza'))
+
+
+def dict_find(dlist, k):
+	print([d, for d in dlist for val in d if val==k else 'NOT PRESENT'] )
+pet_dict  = {'cat':'fluffy','dog':'fido','fish':'swimmy'}
+food_dict = {'pizza':'italian','toast':'french'}
+mast_dict = []
+mast_dict.append(pet_dict)
+mast_dict.append(food_dict)
+
+# print(dict_find(mast_dict,'cat'))
+#print(mast_dict)
+dict_find(mast_dict,'cat')
