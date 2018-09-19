@@ -54,3 +54,28 @@ print(dict_find(mast_dict,'pizza'))
 def file_line_count(infile):
 	return(sum(1 for line in open(infile)))
 print(file_line_count('stories.txt'))
+
+## 7a
+def make_inverse_index(strlist):
+	[document for document in strlist]
+	
+	myDict={}	
+
+	for i, value in enumerate(document,0):
+		index=[i]
+		for word in value.split():
+			if word in myDict:
+				myDict[word].append(i)
+			else:
+				myDict.update({ word:[i]})
+
+	returnmyDict)
+
+with open('stringDoc.txt') as infile:
+	document=infile.readlines()
+document=[i.strip() for i in document]
+
+make_inverse_index(document)
+
+## 7b
+
