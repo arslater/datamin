@@ -42,13 +42,6 @@ def dict_init():
 	return mydict
 def dict_find(dlist, k):
 	return [['NOT PRESENT',d][val==k] for d in dlist for val in d ]
-pet_dict  = {'cat':'fluffy','dog':'fido','fish':'swimmy'}
-food_dict = {'pizza':'italian','toast':'french'}
-mast_dict = []
-mast_dict.append(pet_dict)
-mast_dict.append(food_dict)
-
-print(dict_find(mast_dict,'pizza'))
 
 ## 6
 def file_line_count(infile):
@@ -70,17 +63,26 @@ def make_inverse_index(strlist):
 
 	return(myDict)
 
-with open('stringDoc.txt') as infile:
+with open('stories.txt') as infile:
 	document=infile.readlines()
 document=[i.strip('\n') for i in document]
 
-#print(document)
-#print(make_inverse_index(document))
-
 ## 7b
-def or_search(inverseIndex,query):
-	
-	print([inverseIndex[item] for item in query if item in inverseIndex.keys()])
-or_search(make_inverse_index(document), ['Cats','dogs','cow'])
+def or_search(inverseIndex,query):	
+	return([inverseIndex[item] for item in query if item in inverseIndex.keys()])
 
 ## 7c
+def and_search(inverseIndex, query):
+	andDict= []
+	for item in query:
+		if item not in inverseIndex.keys():
+			return '[[]]'
+	andDict.append(inverseIndex[item])
+	return andDict                                                             
+
+## 7d
+with open("results.txt","a") as outfile:
+	outfile.write(str(or_search(make_inverse_index(document),"united states" )))
+	outfile.write(str(and_search(make_inverse_index(document),"united states" )))
+	outfile.write(str(or_search(make_inverse_index(document),"wall street" )))
+	outfile.write(str(and_search(make_inverse_index(document),"wall street" )))
