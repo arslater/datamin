@@ -57,25 +57,30 @@ print(file_line_count('stories.txt'))
 
 ## 7a
 def make_inverse_index(strlist):
-	[document for document in strlist]
+	document = [document for document in strlist]
 	
 	myDict={}	
 
 	for i, value in enumerate(document,0):
-		index=[i]
 		for word in value.split():
 			if word in myDict:
 				myDict[word].append(i)
 			else:
 				myDict.update({ word:[i]})
 
-	returnmyDict)
+	return(myDict)
 
 with open('stringDoc.txt') as infile:
 	document=infile.readlines()
-document=[i.strip() for i in document]
+document=[i.strip('\n') for i in document]
 
-make_inverse_index(document)
+#print(document)
+#print(make_inverse_index(document))
 
 ## 7b
+def or_search(inverseIndex,query):
+	
+	print([inverseIndex[item] for item in query if item in inverseIndex.keys()])
+or_search(make_inverse_index(document), ['Cats','dogs','cow'])
 
+## 7c
