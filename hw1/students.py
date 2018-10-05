@@ -2,7 +2,6 @@ from numpy.random import normal
 import matplotlib.pyplot as plt
 
 students=[]
-
 i=0
 
 while i<1000:
@@ -21,16 +20,11 @@ while(i<621):
     students.append(4)
     i+=1
 
-
-#n, bins, patches = plt.hist(x, 50, density=1, facecolor='g', alpha=0.75)
-
 n,bins,patched = plt.hist(students, [1,2,3,4,5], density=1)
-#plt.axis([1,4,0,1])
+
 plt.xticks([1,2,3,4,5])
 plt.grid(True)
-plt.title("Gaussian Histogram")
-plt.xlabel("Value")
-plt.ylabel("Frequency")
+plt.title("Probability Mass Function of Students' Year in College")
+plt.xlabel("Random Variable: College Year (1-4)")
+plt.ylabel("Probability")
 plt.show()
-
-print(students)
