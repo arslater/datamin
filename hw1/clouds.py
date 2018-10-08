@@ -23,11 +23,17 @@ def center(matrix):
     return np.matrix(centeredMatrix)
 
 def covar(matrix):
-    print("nah")
+    matrix -= matrix.mean(axis=0)
+    n=matrix.shape[1]
+
+    fract= float(n-1)
+    return(np.dot(matrix,matrix.T.conj())/fract)
 
 def eign(matrix):
-    print("Eigenvalues: ",np.linalg.eigvals(np.resize(matrix,[10,10])))
+    evals,evects=np.linalg.eigh(np.resize(matrix,[10,10]))
+    return(evals,evects)
 
 data = np.loadtxt("cloud.data")
-print(np.mean(center(data)))
-eign(center(data))
+#print(center(data))
+#eign(center(data))
+#print(covar(center(data)))
