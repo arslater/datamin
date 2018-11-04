@@ -1,3 +1,23 @@
+import math
+def entrophy(D):
+
+    X,y = D
+
+    c1=0
+    c2=0
+
+    for item in y:
+        if item == 1:
+            c1+=1
+        if item == 0:
+            c2+=1
+
+    prob_c1=c1/(c1+c2)
+    prob_c2=c2/(c1+c2)
+
+    return(-(prob_c1)*math.log(prob_c1,2)
+           +(prob_c2*math.log(prob_c2,2)))
+
 
 def IG(D, index, value):
     """Compute the Information Gain of a split on attribute index at value
@@ -12,8 +32,37 @@ def IG(D, index, value):
         The value of the Information Gain for the given split
     """
 
+    X,y = D
 
+    xn = []
+    xy = []
+    yn = []
+    yy = []
 
+    ny = 0
+    nn = 0
+
+    print("Splitting at column:",index," when value <",value)
+    for i in range(0,len(X)-1):
+        if(X[i][index] < value):
+            xy.append(X[i][index])
+            yy.append(y[i])
+        else:
+            xn.append(X[i][index])
+            yn.append(y[i])
+
+    Dy = (xy,yy)
+    Dn = (xn,yn)
+
+    for item in yy:
+        if item == 1:
+            ny += 1
+    for item in yn:
+        if item == 0:
+            nn +=1
+    #print(nn,len(yn),ny,len(yy))
+    return(entrophy(D)-((ny/len(yy)*entrophy(Dy))
+                       +(nn/len(yn)*entrophy(Dn))))
 def G(D, index, value):
     """Compute the Gini index of a split on attribute index at value
     for dataset D.
@@ -75,15 +124,21 @@ def load(filename):
             i=0
             x=[]
             for word in line.rstrip('\n').split(','):
+                #print(word)
                 if i == 10:
-                    y.append(word)
+                    y.append(float(word))
                 else:
-                    x.append(word)
+                    try:
+                        x.append(float(word))
+                    except:
+                        pass
                 i+=1
             X.append(x)
     return(X,y)
 
-load("train.txt")
+X,y=load("train.txt")
+IG((X,y),1,28)
+#print(entrophy(load("train.txt")))
 def classifyIG(train, test):
     """Builds a single-split decision tree using the Information Gain criterion
     and dataset train, and returns a list of predicted classes for dataset test
