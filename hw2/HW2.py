@@ -8,6 +8,7 @@ def prob(y):
     c1=0
     c2=0
 
+   # print("P:",y)
     for item in y:
         if item == 1:
             c1+=1
@@ -47,10 +48,15 @@ def entrophy(D):
 
     c1,c2=prob(y)
 
+    #print("E:c1+c2=",c1,"+",c2,"=",c1+c2)
+
     prob_c1=c1/(c1+c2)
     prob_c2=c2/(c1+c2)
 
-    return(-(prob_c1)*math.log(prob_c1,2)
+    if ( prob_c1 == 1 or prob_c2 == 1):
+        return 0
+    else:
+        return(-(prob_c1)*math.log(prob_c1,2)
            +(prob_c2*math.log(prob_c2,2)))
 
 
@@ -68,19 +74,12 @@ def IG(D, index, value):
     """
     Dy,Dn = split(D,index,value)
 
+    #print("Dy:",Dy)
+    #print("Dn:",Dn)
     Xy,yy = Dy  ## Data set of yes's
     Xn,yn = Dn  ## Data set of No's
 
-    # nn=0
-    # ny=0
-    #
-    # for item in yy:
-    #     if item == 1:
-    #         ny += 1
-    # for item in yn:
-    #     if item == 0:
-    #         nn +=1
-    #print(nn,len(yn),ny,len(yy))
+    #print(prob(yy),len(yy),prob(yn),len(yn))
     return(entrophy(D)-((len(yy)/len(y)*entrophy(Dy))
                        +(len(yn)/len(y)*entrophy(Dn))))
 def G(D, index, value):
@@ -100,7 +99,7 @@ def G(D, index, value):
     Xy,yy=Dy
     Xn,yn=Dn
 
-    print(Dn)
+   # print(Dn)
 
     yc1,yc2 = prob(yy)
     nc1,nc2 = prob(yn)
@@ -157,8 +156,8 @@ def CART(D, index, value):
     #yy: contains the calsses for each entry in split yes
     #yn: contains the classes for each entry in split no
 
-    print(yy)
-    print("NUMBER OF 1s IN YEZ",yc1,len(yy))
+    #print(yy)
+    #print("NUMBER OF 1s IN YEZ",yc1,len(yy))
 
     Pc1y = (yc1/len(yy))  # prob of c1 in yes
     Pc1n = (nc1/len(yn))  # prob of c1 in no
@@ -166,7 +165,7 @@ def CART(D, index, value):
     Pc2n = (nc2/len(yn))  # prob of c2 in no
 
     cart = coef*(abs(Pc1y-Pc1n)+abs(Pc2y-Pc2n))
-    print(cart)
+    return(cart)
 
 def bestSplit(D, criterion):
     """Computes the best split for dataset D using the specified criterion
@@ -184,29 +183,62 @@ def bestSplit(D, criterion):
     X,y = D
     indexToTest = len(X[0])
 
-    cols = []
     valuesToTest = []
 
     for i in range(0, indexToTest):
         col = []
         for j in range(0, len(y)):
             col.append(X[j][i])
-        cols.append(col)
         valuesToTest.append((min(col),max(col)))
-    print(valuesToTest)
+   # print(valuesToTest)
+    best = 0.0
+    bestIndex=0
+    bestValue=0
 
     if criterion == "IG":
         print("IG")
 
-
+        for i in range(0,indexToTest):
+            minval,maxval=valuesToTest[i]
+            #print(int(minval),int(maxval))
+            for j in range(int(minval),int(maxval)):
+                ig = IG(D,i,j)
+                if ig > best:
+                    best = ig
+                    bestIndex = i
+                    bestValue = j
+               # print("testing index[", i, "] with value[", j, "]: IG:",ig)
     elif criterion == "GINI":
         print("GINI")
+        best=10
+        for i in range(0,indexToTest):
+            minval,maxval=valuesToTest[i]
+            #print(int(minval),int(maxval))
+            for j in range(int(minval),int(maxval)):
+                g = G(D,i,j)
+              #  print(g)
+                if g < best:
+                    best = g
+                    bestIndex = i
+                    bestValue = j
+               # print("testing index[", i, "] with value[", j, "]: IG:",g)
     elif criterion == "CART":
         print("CART")
+        for i in range(0,indexToTest):
+            minval,maxval=valuesToTest[i]
+            #print(int(minval),int(maxval))
+            for j in range(int(minval),int(maxval)):
+                cart = CART(D,i,j)
+                if cart > best:
+                    best = cart
+                    bestIndex = i
+                    bestValue = j
+                #print("testing index[", i, "] with value[", j, "]: IG:",cart)
     else:
         print("Option not recognized!")
         exit(-1)
 
+    print(best, bestIndex, bestValue)
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
     observations are organized as rows.
@@ -244,6 +276,8 @@ X,y=load("train.txt")
 #print(y)
 #CART((X,y),0,0)
 print(bestSplit((X,y),"IG"))
+print(bestSplit((X,y),"GINI"))
+print(bestSplit((X,y),"CART"))
 #print(entrophy(load("train.txt")))
 def classifyIG(train, test):
     """Builds a single-split decision tree using the Information Gain criterion
