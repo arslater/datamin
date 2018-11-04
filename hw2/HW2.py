@@ -181,6 +181,31 @@ def bestSplit(D, criterion):
 
     #functions are first class objects in python, so let's refer to our desired criterion by a single name
 
+    X,y = D
+    indexToTest = len(X[0])
+
+    cols = []
+    valuesToTest = []
+
+    for i in range(0, indexToTest):
+        col = []
+        for j in range(0, len(y)):
+            col.append(X[j][i])
+        cols.append(col)
+        valuesToTest.append((min(col),max(col)))
+    print(valuesToTest)
+
+    if criterion == "IG":
+        print("IG")
+
+
+    elif criterion == "GINI":
+        print("GINI")
+    elif criterion == "CART":
+        print("CART")
+    else:
+        print("Option not recognized!")
+        exit(-1)
 
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
@@ -217,7 +242,8 @@ X,y=load("train.txt")
 #IG((X,y),1,28)
 #G((X,y),0,0)
 #print(y)
-CART((X,y),0,0)
+#CART((X,y),0,0)
+print(bestSplit((X,y),"IG"))
 #print(entrophy(load("train.txt")))
 def classifyIG(train, test):
     """Builds a single-split decision tree using the Information Gain criterion
