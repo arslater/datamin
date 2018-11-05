@@ -60,8 +60,8 @@ def split(D,index,value):
 
     return (Dy,Dn)
 
-def entrophy(D):
-    """ Helper function that returns the entrophy of a given dataset, D
+def entropy(D):
+    """ Helper function that returns the entropy of a given dataset, D
     """
     X,y = D
 
@@ -71,7 +71,7 @@ def entrophy(D):
     prob_c2=c2/(c1+c2)  ## Probability of class 2
 
     if ( prob_c1 == 1 or prob_c2 == 1):
-        ## Perfect split, no entrophy
+        ## Perfect split, no entropy
         return 0
     else:
         return(-((prob_c1)*math.log(prob_c1,2)
@@ -93,8 +93,8 @@ def IG(D, index, value):
     Xy,yy = Dy  ## Data set of yes's | Xy=attributes, yy=classes in yes
     Xn,yn = Dn  ## Data set of No's  | Xy=attributes, yy=classes in no
 
-    return(entrophy(D)-((len(yy)/len(y)*entrophy(Dy))
-                       +(len(yn)/len(y)*entrophy(Dn))))
+    return(entropy(D)-((len(yy)/len(y)*entropy(Dy))
+                       +(len(yn)/len(y)*entropy(Dn))))
 def G(D, index, value):
     """
     Args:
@@ -358,7 +358,7 @@ def classifyCART(train, test):
 
     col_X = []  # Will be the attribute specified by index
     Dy = []  # The classes whose attributes go into the "Yes" tree
-    Dn = []  # The calsses whose attributes go into the "No"  tree
+    Dn = []  # The classes whose attributes go into the "No"  tree
     predict = []  # Will be the list of predicted values
 
     classifier, index, value = bestSplit(train, "CART")
@@ -399,16 +399,15 @@ def main():
     X,y = E
     y = [int(item) for item in y]
     print(bestSplit(D,"CART"),end="")
-    print(classifyCART(load("train.txt"), load("test.txt")))
+    print(classifyCART(load("train.txt"), load("test.txt")),"[CART]")
 
     print(bestSplit(D,"IG"),end="")
-    print(classifyIG(load("train.txt"), load("test.txt")))
+    print(classifyIG(load("train.txt"), load("test.txt")),"[IG]")
 
     print(bestSplit(D,"GINI"),end="")
-    print(classifyG(load("train.txt"), load("test.txt")))
-    print("****\n           ",y)
+    print(classifyG(load("train.txt"), load("test.txt")),"[GINI]")
 
-    print(G(D,2,0))
+    print("           ",y,"[ACTUAL]")
 
 if __name__=="__main__":
 # 	"""__name__=="__main__" when the python script is run directly, not when it
