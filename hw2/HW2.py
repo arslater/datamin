@@ -3,7 +3,7 @@ import math
 def prob(y):
     """Returns a tuple (c1,c2
     of the instances with a 1 and 0 respectively
-    of a certain calss occuring
+    of a certain class occuring
     """
     c1=0
     c2=0
@@ -34,7 +34,6 @@ def split(D,index,value):
             xy.append(X[i][index])
             yy.append(y[i])
         else:
-           # print("DING")
             xn.append(X[i][index])
             yn.append(y[i])
 
@@ -216,7 +215,6 @@ def bestSplit(D, criterion):
             #print(int(minval),int(maxval))
             for j in range(int(minval),int(maxval)):
                 g = G(D,i,j)
-              #  print(g)
                 if g < best:
                     best = g
                     bestIndex = i
@@ -238,7 +236,7 @@ def bestSplit(D, criterion):
         print("Option not recognized!")
         exit(-1)
 
-    print(best, bestIndex, bestValue)
+    return(best, bestIndex, bestValue)
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
     observations are organized as rows.
@@ -275,7 +273,7 @@ X,y=load("train.txt")
 #G((X,y),0,0)
 #print(y)
 #CART((X,y),0,0)
-print(bestSplit((X,y),"IG"))
+# print(bestSplit((X,y),"IG"))
 print(bestSplit((X,y),"GINI"))
 print(bestSplit((X,y),"CART"))
 #print(entrophy(load("train.txt")))
@@ -290,7 +288,38 @@ def classifyIG(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
+    #print(train)
+    #print(test)
+    #print("***")
 
+    test_X,test_y = test
+    i = 0
+
+    for row in test_X:
+        #print(row,test_y[i])
+        test_y[i] = int(test_y[i])
+        i+=1
+
+    col_X         = []
+    classifier,index,value = bestSplit(train,"IG")
+
+    ## Want to get the desired column of specified index
+    for i in range(0,len(test_y)):
+        col_X.append(test_X[i][index])
+
+    print(col_X)
+
+    pval = []
+    for entry in col_X:
+        if (entry <= value):
+            pval.append(0)
+        else:
+            pval.append(1)
+    print("****")
+    print(test_y)
+    #print(pval)
+    return(pval)
+    #print(split(test,index,value))
 
 def classifyG(train, test):
     """Builds a single-split decision tree using the GINI criterion
@@ -303,6 +332,33 @@ def classifyG(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
+    test_X, test_y = test
+    i = 0
+
+    for row in test_X:
+        # print(row, test_y[i])
+        test_y[i] = int(test_y[i])
+        i += 1
+
+    col_X = []
+    classifier, index, value = bestSplit(train, "GINI")
+
+    ## Want to get the desired column of specified index
+    for i in range(0, len(test_y)):
+        col_X.append(test_X[i][index])
+
+    # print(col_X)
+
+    pval = []
+    for entry in col_X:
+        if (entry <= value):
+            pval.append(0)
+        else:
+            pval.append(1)
+    print("*****")
+    print(test_y)
+    print(pval)
+    # return (pval)
 
 
 def classifyCART(train, test):
@@ -316,8 +372,37 @@ def classifyCART(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
+    test_X, test_y = test
+    i = 0
 
+    for row in test_X:
+        #print(row, test_y[i])
+        test_y[i] = int(test_y[i])
+        i += 1
 
+    col_X = []
+    classifier, index, value = bestSplit(train, "CART")
+
+    ## Want to get the desired column of specified index
+    for i in range(0, len(test_y)):
+        col_X.append(test_X[i][index])
+
+    #print(col_X)
+
+    pval = []
+    for entry in col_X:
+        if (entry <= value):
+            pval.append(1)
+        else:
+            pval.append(0)
+    print("*****")
+    print(test_y)
+    print(pval)
+    #return (pval)
+
+print(classifyCART(load("train.txt"),load("test.txt")))
+print(classifyIG(load("train.txt"),load("test.txt")))
+print(classifyG(load("train.txt"),load("test.txt")))
 
 def main():
     """This portion of the program will run when run only when main() is called.
