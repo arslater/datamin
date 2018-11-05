@@ -6,6 +6,7 @@
 ##  by Anita Slater
 ##
 import math
+from statistics import mode
 
 def prob(y):
     """ IMPORTANT ASSUMPTION HERE:
@@ -187,7 +188,7 @@ def bestSplit(D, criterion):
 
     if criterion == "GINI":
         ## Want to minimize GINI
-        best = 1
+        best = 10.0
 
     for i in range(0, indexToTest):
         ## Getting the minimum and maximum values for each column
@@ -209,7 +210,7 @@ def bestSplit(D, criterion):
             else:
                 print("ERROR:Criteria not recognized!")
                 exit(-1)
-            if criterion != 'GINI':
+            if criterion != "GINI":
                 if result > best:
                     best = result
                     bestIndex = i
@@ -220,7 +221,7 @@ def bestSplit(D, criterion):
                     bestIndex = i
                     bestValue = j
 
-    return(best, bestIndex, bestValue)
+    return(round(best,2), bestIndex, bestValue)
 
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
@@ -267,22 +268,35 @@ def classifyIG(train, test):
     test_y = [int(item) for item in test_y]  ## convert list of floats to int
 
     col_X = []  # Will be the attribute specified by index
-    pval = []  # The list of predicted values
+    Dy = []  # The classes whose attributes go into the "Yes" tree
+    Dn = []  # The calsses whose attributes go into the "No"  tree
+    predict = []  # Will be the list of predicted values
 
     classifier, index, value = bestSplit(train, "IG")
 
     ## Want to get the desired column of specified index from the best split
     for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
+    i = 0
 
     for entry in col_X:
-        ## actual classifiying done here
+        ## actual classifiying done here, done by best split method
         if (entry <= value):
-            pval.append(0)
+            Dy.append(test_y[i])
         else:
-            pval.append(1)
+            Dn.append(test_y[i])
+        i += 1
 
-    return (pval)
+    Dy_predictor = mode(Dy)  ## Getting the mode of the no  tree, will predict class
+    Dn_predictor = mode(Dn)  ## Getting the mode of the yes tree,"                  "
+
+    for entry in col_X:
+        ## Predicting done here!
+        if (entry <= value):
+            predict.append(Dy_predictor)
+        else:
+            predict.append(Dn_predictor)
+    return (predict)
 
 def classifyG(train, test):
     """Builds a single-split decision tree using the GINI criterion
@@ -298,25 +312,36 @@ def classifyG(train, test):
     test_X, test_y = test  ## X and y components of test
     test_y = [int(item) for item in test_y]  ## convert list of floats to int
 
-    col_X = []  # Will be the attribute specified by index
-    pval = []  # The list of predicted values
+    col_X   = [] # Will be the attribute specified by index
+    Dy = []  # The classes whose attributes go into the "Yes" tree
+    Dn = []  # The calsses whose attributes go into the "No"  tree
+    predict = [] # Will be the list of predicted values
 
     classifier, index, value = bestSplit(train, "GINI")
 
     ## Want to get the desired column of specified index from the best split
     for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
+    i=0
 
     for entry in col_X:
-        ## actual classifiying done here
+        ## actual classifiying done here, done by best split method
         if (entry <= value):
-            pval.append(0)
+            Dy.append(test_y[i])
         else:
-            pval.append(1)
+            Dn.append(test_y[i])
+        i+=1
 
-    return (pval)
+    Dy_predictor=mode(Dy)   ## Getting the mode of the no  tree, will predict class
+    Dn_predictor=mode(Dn)   ## Getting the mode of the yes tree,"                  "
 
-
+    for entry in col_X:
+        ## Predicting done here!
+        if (entry <= value):
+            predict.append(Dy_predictor)
+        else:
+            predict.append(Dn_predictor)
+    return(predict)
 def classifyCART(train, test):
     """Builds a single-split decision tree using the CART criterion
     and dataset train, and returns a list of predicted classes for dataset test
@@ -332,22 +357,35 @@ def classifyCART(train, test):
     test_y = [int(item) for item in test_y] ## convert list of floats to int
 
     col_X = []  # Will be the attribute specified by index
-    pval  = []  # The list of predicted values
+    Dy = []  # The classes whose attributes go into the "Yes" tree
+    Dn = []  # The calsses whose attributes go into the "No"  tree
+    predict = []  # Will be the list of predicted values
 
     classifier, index, value = bestSplit(train, "CART")
 
     ## Want to get the desired column of specified index from the best split
     for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
+    i = 0
 
     for entry in col_X:
-        ## actual classifiying done here
+        ## actual classifiying done here, done by best split method
         if (entry <= value):
-            pval.append(1)
+            Dy.append(test_y[i])
         else:
-            pval.append(0)
+            Dn.append(test_y[i])
+        i += 1
 
-    return (pval)
+    Dy_predictor = mode(Dy)  ## Getting the mode of the no  tree, will predict class
+    Dn_predictor = mode(Dn)  ## Getting the mode of the yes tree,"                  "
+
+    for entry in col_X:
+        ## Predicting done here!
+        if (entry <= value):
+            predict.append(Dy_predictor)
+        else:
+            predict.append(Dn_predictor)
+    return (predict)
 
 def main():
     """This portion of the program will run when run only when main() is called.
@@ -356,12 +394,21 @@ def main():
     This way, when you <import HW2>, no code is run - only the functions you
     explicitly call.
     """
-    X, y = load("test.txt")
+    D= load("train.txt")
+    E= load("test.txt")
+    X,y = E
     y = [int(item) for item in y]
+    print(bestSplit(D,"CART"),end="")
     print(classifyCART(load("train.txt"), load("test.txt")))
+
+    print(bestSplit(D,"IG"),end="")
     print(classifyIG(load("train.txt"), load("test.txt")))
+
+    print(bestSplit(D,"GINI"),end="")
     print(classifyG(load("train.txt"), load("test.txt")))
-    print(y)
+    print("****\n           ",y)
+
+    print(G(D,2,0))
 
 if __name__=="__main__":
 # 	"""__name__=="__main__" when the python script is run directly, not when it
