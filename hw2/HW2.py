@@ -1,68 +1,83 @@
+#############################################
+##
+## CSI 431 -- Data Mining
+##  HW2: Decision Tree Classifiers
+##
+##  by Anita Slater
+##
 import math
 
 def prob(y):
-    """Returns a tuple (c1,c2
-    of the instances with a 1 and 0 respectively
-    of a certain class occuring
-    """
-    c1=0
-    c2=0
+    """ IMPORTANT ASSUMPTION HERE:
+        ** c1 = 1 ** (class 1 is 1)
+        ** c2 = 0 ** (class 2 is 0)
 
-   # print("P:",y)
+        This helper function takes a dataset, y, of all of the
+        instances of classes in a dataset and returns the number
+        of items in each class as a tuple, (c1,c2). Where c1
+        represents the number of instances of class 1 and c2
+        represents the number of instances of class 2.
+    """
+    c1=0    ## Number of 1's
+    c2=0    ## Number of 0's
+
     for item in y:
         if item == 1:
             c1+=1
         if item == 0:
             c2+=1
     return(c1,c2)
+
 def split(D,index,value):
-    """Returns Dy and Dn, tuples of the split"""
+    """ Another helper function, takes a dataset,D, and returns
+        the tuple, (Dy,Dn) of the split of D according to the
+        parameters: index and value.
+
+        ** IMPORTANT ASSUMPTION:
+            split happens when instance <= value
+    """
     X, y = D
 
-    xn = []
-    xy = []
-    yn = []
-    yy = []
+    xn = [] ## List of attributes in Yes
+    xy = [] ## List of attributes in No
+    yn = [] ## List of classes in No
+    yy = [] ## List of classes in Yes
 
-    ny = 0
-    nn = 0
-
-   # print("Splitting at column:", index, " when value <", value)
     for i in range(0, len(X) - 1):
-       # print(X[i][index],"??",value)
+
         if (X[i][index] <= value):
+            ## 'Yes' tree
             xy.append(X[i][index])
             yy.append(y[i])
         else:
+            ## 'No' tree
             xn.append(X[i][index])
             yn.append(y[i])
 
-    Dy = (xy, yy)
-    Dn = (xn, yn)
+    Dy = (xy, yy)   ## Data set of No's
+    Dn = (xn, yn)   ## Data set pf Yes's
 
     return (Dy,Dn)
-def entrophy(D):
 
+def entrophy(D):
+    """ Helper function that returns the entrophy of a given dataset, D
+    """
     X,y = D
 
-    c1,c2=prob(y)
+    c1,c2=prob(y) ## Getting the number of each class in the dataset
 
-    #print("E:c1+c2=",c1,"+",c2,"=",c1+c2)
-
-    prob_c1=c1/(c1+c2)
-    prob_c2=c2/(c1+c2)
+    prob_c1=c1/(c1+c2)  ## Probability of class 1
+    prob_c2=c2/(c1+c2)  ## Probability of class 2
 
     if ( prob_c1 == 1 or prob_c2 == 1):
+        ## Perfect split, no entrophy
         return 0
     else:
-        return(-(prob_c1)*math.log(prob_c1,2)
-           +(prob_c2*math.log(prob_c2,2)))
-
+        return(-((prob_c1)*math.log(prob_c1,2)
+           +(prob_c2*math.log(prob_c2,2))))
 
 def IG(D, index, value):
-    """Compute the Information Gain of a split on attribute index at value
-    for dataset D.
-
+    """
     Args:
         D: a dataset, tuple (X, y) where X is the data, y the classes
         index: the index of the attribute (column of X) to split on
@@ -71,20 +86,16 @@ def IG(D, index, value):
     Returns:
         The value of the Information Gain for the given split
     """
+    X,y = D
     Dy,Dn = split(D,index,value)
 
-    #print("Dy:",Dy)
-    #print("Dn:",Dn)
-    Xy,yy = Dy  ## Data set of yes's
-    Xn,yn = Dn  ## Data set of No's
+    Xy,yy = Dy  ## Data set of yes's | Xy=attributes, yy=classes in yes
+    Xn,yn = Dn  ## Data set of No's  | Xy=attributes, yy=classes in no
 
-    #print(prob(yy),len(yy),prob(yn),len(yn))
     return(entrophy(D)-((len(yy)/len(y)*entrophy(Dy))
                        +(len(yn)/len(y)*entrophy(Dn))))
 def G(D, index, value):
-    """Compute the Gini index of a split on attribute index at value
-    for dataset D.
-
+    """
     Args:
         D: a dataset, tuple (X, y) where X is the data, y the classes
         index: the index of the attribute (column of X) to split on
@@ -93,15 +104,14 @@ def G(D, index, value):
     Returns:
         The value of the Gini index for the given split
     """
+    X,y = D
     Dy,Dn = split(D,index,value)
 
-    Xy,yy=Dy
-    Xn,yn=Dn
+    Xy,yy = Dy  ## Data set of yes's | Xy=attributes, yy=classes in yes
+    Xn,yn = Dn  ## Data set of No's  | Xy=attributes, yy=classes in no
 
-   # print(Dn)
-
-    yc1,yc2 = prob(yy)
-    nc1,nc2 = prob(yn)
+    yc1,yc2 = prob(yy)  ## Number of 1's,0's in yes tree
+    nc1,nc2 = prob(yn)  ## Number of 1's,0's in no  tree
 
     ## G(DY)
     prob_c1=yc1/(yc1+yc2)
@@ -115,15 +125,10 @@ def G(D, index, value):
 
     Gdn = 1 - ((prob_c1 ** 2) + (prob_c2 ** 2))
 
-   # print("Prob of ys",(len(yy)/len(y)))
-   # print("Prob of ns",(len(yn)/len(y)))
-
     return(((len(yy)/len(y))*Gdy)+((len(yn)/len(y))*Gdn))
 
 def CART(D, index, value):
-    """Compute the CART measure of a split on attribute index at value
-    for dataset D.
-
+    """
     Args:
         D: a dataset, tuple (X, y) where X is the data, y the classes
         index: the index of the attribute (column of X) to split on
@@ -136,27 +141,22 @@ def CART(D, index, value):
 
     Dy,Dn = split(D,index,value)
 
-    Xy,yy = Dy
-    Xn,yn = Dn
+    Xy,yy = Dy  ## Data set of yes's | Xy=attributes, yy=classes in yes
+    Xn,yn = Dn  ## Data set of No's  | Xy=attributes, yy=classes in no
 
     coef = 2*(len(yy)/len(y))*(len(yn)/len(y))
+    ## The coefficent in front of the sumamtion
 
-    yc1,yc2 = prob(yy)
-    ## Gets the number of c1's and c2's in the yes split
+    yc1, yc2 = prob(yy)  ## Number of 1's,0's in yes tree
+    nc1, nc2 = prob(yn)  ## Number of 1's,0's in no  tree
 
-    nc1,nc2 = prob(yn)
-    ## Gets the number of c1s and c2s in class no
+    #yc1: The number of c1(1)s in yes tree
+    #yc2: The number of c2(0)s in yes tree
+    #nc1: The number of c1(1)s in no  tree
+    #nc2: The number of c2(0)s in no  tree
 
-    #yc1: The number of c1s in split yes
-    #yc2: The number of c2s in split yes
-    #nc1: The number of c1s in split no
-    #nc2: The number of c2s in split no
-
-    #yy: contains the calsses for each entry in split yes
-    #yn: contains the classes for each entry in split no
-
-    #print(yy)
-    #print("NUMBER OF 1s IN YEZ",yc1,len(yy))
+    #yy: contains the classes for each entry in yes tree
+    #yn: contains the classes for each entry in no  tree
 
     Pc1y = (yc1/len(yy))  # prob of c1 in yes
     Pc1n = (nc1/len(yn))  # prob of c1 in no
@@ -167,8 +167,7 @@ def CART(D, index, value):
     return(cart)
 
 def bestSplit(D, criterion):
-    """Computes the best split for dataset D using the specified criterion
-
+    """
     Args:
         D: A dataset, tuple (X, y) where X is the data, y the classes
         criterion: one of "IG", "GINI", "CART"
@@ -176,67 +175,53 @@ def bestSplit(D, criterion):
     Returns:
         A tuple (i, value) where i is the index of the attribute to split at value
     """
-
     #functions are first class objects in python, so let's refer to our desired criterion by a single name
 
     X,y = D
-    indexToTest = len(X[0])
+    indexToTest  = len(X[0]) ## Gets number of indexes (attributes) in the dataset
+    valuesToTest = []        ## Will contain the rage, as a touple of values in the dataset
 
-    valuesToTest = []
+    best      = 0.0 ## The "best" classification result to test against
+    bestIndex =0    ## Once the "best" vlaue is found, capture the index
+    bestValue =0    ## "                                          " value
+
+    if criterion == "GINI":
+        ## Want to minimize GINI
+        best = 1
 
     for i in range(0, indexToTest):
+        ## Getting the minimum and maximum values for each column
+        ## and saving them as tuples (min,max) in valuesToTest
         col = []
         for j in range(0, len(y)):
             col.append(X[j][i])
         valuesToTest.append((min(col),max(col)))
-   # print(valuesToTest)
-    best = 0.0
-    bestIndex=0
-    bestValue=0
 
-    if criterion == "IG":
-        print("IG")
-
-        for i in range(0,indexToTest):
-            minval,maxval=valuesToTest[i]
-            #print(int(minval),int(maxval))
-            for j in range(int(minval),int(maxval)):
-                ig = IG(D,i,j)
-                if ig > best:
-                    best = ig
+    for i in range(0, indexToTest):
+        minval, maxval = valuesToTest[i]
+        for j in range(int(minval), int(maxval)):
+            if criterion == "IG":
+                result = IG(D,i,j)
+            elif criterion == "GINI":
+                result = G(D,i,j)
+            elif criterion == "CART":
+                result=CART(D,i,j)
+            else:
+                print("ERROR:Criteria not recognized!")
+                exit(-1)
+            if criterion != 'GINI':
+                if result > best:
+                    best = result
                     bestIndex = i
                     bestValue = j
-               # print("testing index[", i, "] with value[", j, "]: IG:",ig)
-    elif criterion == "GINI":
-        print("GINI")
-        best=10
-        for i in range(0,indexToTest):
-            minval,maxval=valuesToTest[i]
-            #print(int(minval),int(maxval))
-            for j in range(int(minval),int(maxval)):
-                g = G(D,i,j)
-                if g < best:
-                    best = g
+            else:
+                if result < best:
+                    best = result
                     bestIndex = i
                     bestValue = j
-               # print("testing index[", i, "] with value[", j, "]: IG:",g)
-    elif criterion == "CART":
-        print("CART")
-        for i in range(0,indexToTest):
-            minval,maxval=valuesToTest[i]
-            #print(int(minval),int(maxval))
-            for j in range(int(minval),int(maxval)):
-                cart = CART(D,i,j)
-                if cart > best:
-                    best = cart
-                    bestIndex = i
-                    bestValue = j
-                #print("testing index[", i, "] with value[", j, "]: IG:",cart)
-    else:
-        print("Option not recognized!")
-        exit(-1)
 
     return(best, bestIndex, bestValue)
+
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
     observations are organized as rows.
@@ -256,7 +241,6 @@ def load(filename):
             i=0
             x=[]
             for word in line.rstrip('\n').split(','):
-                #print(word)
                 if i == 10:
                     y.append(float(word))
                 else:
@@ -268,15 +252,6 @@ def load(filename):
             X.append(x)
     return(X,y)
 
-X,y=load("train.txt")
-#IG((X,y),1,28)
-#G((X,y),0,0)
-#print(y)
-#CART((X,y),0,0)
-# print(bestSplit((X,y),"IG"))
-print(bestSplit((X,y),"GINI"))
-print(bestSplit((X,y),"CART"))
-#print(entrophy(load("train.txt")))
 def classifyIG(train, test):
     """Builds a single-split decision tree using the Information Gain criterion
     and dataset train, and returns a list of predicted classes for dataset test
@@ -288,38 +263,26 @@ def classifyIG(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
-    #print(train)
-    #print(test)
-    #print("***")
+    test_X, test_y = test  ## X and y components of test
+    test_y = [int(item) for item in test_y]  ## convert list of floats to int
 
-    test_X,test_y = test
-    i = 0
+    col_X = []  # Will be the attribute specified by index
+    pval = []  # The list of predicted values
 
-    for row in test_X:
-        #print(row,test_y[i])
-        test_y[i] = int(test_y[i])
-        i+=1
+    classifier, index, value = bestSplit(train, "IG")
 
-    col_X         = []
-    classifier,index,value = bestSplit(train,"IG")
-
-    ## Want to get the desired column of specified index
-    for i in range(0,len(test_y)):
+    ## Want to get the desired column of specified index from the best split
+    for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
 
-    print(col_X)
-
-    pval = []
     for entry in col_X:
+        ## actual classifiying done here
         if (entry <= value):
             pval.append(0)
         else:
             pval.append(1)
-    print("****")
-    print(test_y)
-    #print(pval)
-    return(pval)
-    #print(split(test,index,value))
+
+    return (pval)
 
 def classifyG(train, test):
     """Builds a single-split decision tree using the GINI criterion
@@ -332,33 +295,26 @@ def classifyG(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
-    test_X, test_y = test
-    i = 0
+    test_X, test_y = test  ## X and y components of test
+    test_y = [int(item) for item in test_y]  ## convert list of floats to int
 
-    for row in test_X:
-        # print(row, test_y[i])
-        test_y[i] = int(test_y[i])
-        i += 1
+    col_X = []  # Will be the attribute specified by index
+    pval = []  # The list of predicted values
 
-    col_X = []
     classifier, index, value = bestSplit(train, "GINI")
 
-    ## Want to get the desired column of specified index
+    ## Want to get the desired column of specified index from the best split
     for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
 
-    # print(col_X)
-
-    pval = []
     for entry in col_X:
+        ## actual classifiying done here
         if (entry <= value):
             pval.append(0)
         else:
             pval.append(1)
-    print("*****")
-    print(test_y)
-    print(pval)
-    # return (pval)
+
+    return (pval)
 
 
 def classifyCART(train, test):
@@ -372,37 +328,26 @@ def classifyCART(train, test):
     Returns:
         A list of predicted classes for observations in test (in order)
     """
-    test_X, test_y = test
-    i = 0
+    test_X, test_y = test ## X and y components of test
+    test_y = [int(item) for item in test_y] ## convert list of floats to int
 
-    for row in test_X:
-        #print(row, test_y[i])
-        test_y[i] = int(test_y[i])
-        i += 1
+    col_X = []  # Will be the attribute specified by index
+    pval  = []  # The list of predicted values
 
-    col_X = []
     classifier, index, value = bestSplit(train, "CART")
 
-    ## Want to get the desired column of specified index
+    ## Want to get the desired column of specified index from the best split
     for i in range(0, len(test_y)):
         col_X.append(test_X[i][index])
 
-    #print(col_X)
-
-    pval = []
     for entry in col_X:
+        ## actual classifiying done here
         if (entry <= value):
             pval.append(1)
         else:
             pval.append(0)
-    print("*****")
-    print(test_y)
-    print(pval)
-    #return (pval)
 
-print(classifyCART(load("train.txt"),load("test.txt")))
-print(classifyIG(load("train.txt"),load("test.txt")))
-print(classifyG(load("train.txt"),load("test.txt")))
+    return (pval)
 
 def main():
     """This portion of the program will run when run only when main() is called.
@@ -411,12 +356,17 @@ def main():
     This way, when you <import HW2>, no code is run - only the functions you
     explicitly call.
     """
+    X, y = load("test.txt")
+    y = [int(item) for item in y]
+    print(classifyCART(load("train.txt"), load("test.txt")))
+    print(classifyIG(load("train.txt"), load("test.txt")))
+    print(classifyG(load("train.txt"), load("test.txt")))
+    print(y)
 
-
-# if __name__=="__main__":
+if __name__=="__main__":
 # 	"""__name__=="__main__" when the python script is run directly, not when it
 # 	is imported. When this program is run from the command line (or an IDE), the
 # 	following will happen; if you <import HW2>, nothing happens unless you call
 # 	a function.
 # 	"""
-# 	main()
+ 	main()
