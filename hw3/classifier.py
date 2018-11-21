@@ -6,10 +6,15 @@
 import sys, os
 import matplotlib.pyplot as plt
 from sklearn import svm
+import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import recall_score
+from sklearn.metrics import average_precision_score
 from sklearn.metrics import f1_score
-import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 def load(filename):
     """Loads filename as a dataset. Assumes the last column is classes, and
@@ -80,6 +85,8 @@ def doSVM(dataset):
     plt.xlabel("C Measures")
     plt.ylabel("F-Measure")
     plt.show()
+
+    return scores
     #print(y)
    # i *= 10
     # # Import scikit-learn dataset library
@@ -96,4 +103,82 @@ def doSVM(dataset):
     #
     # print(X_train,y_train)
     # print(X,y)
-doSVM(load("cancer-data-train.csv"))
+
+def DTree(dataset):
+    X,y = dataset
+
+    gini_scores = []
+    ig_scores   = []
+    avg = 0
+    i   = 0
+
+    K=[2,5,10,20]
+
+    for k in K:
+        DT_gini = DecisionTreeClassifier('gini',max_leaf_nodes=k)
+        DT_ig   = DecisionTreeClassifier('entropy',max_leaf_nodes=k)
+
+        for score in (cross_val_score(DT_gini,X,y,cv=10,scoring='f1_macro')):
+            avg += score
+            i+=1
+        gini_scores.append(avg/i)
+
+        for score in (cross_val_score(DT_ig,X,y,cv=10,scoring='f1_macro')):
+            avg += score
+            i+=1
+        ig_scores.append(avg/i)
+
+    print(gini_scores)
+    print(ig_scores)
+
+    plt.plot(K,gini_scores)
+    plt.plot(K,ig_scores)
+    plt.xlabel('Values of k')
+    plt.ylabel('Average F Measure')
+    plt.legend(['Gini Tree', 'Information Gain Tree'])
+    plt.show()
+
+    return(gini_scores,ig_scores)
+
+# doSVM(load("cancer-data-train.csv"))
+# DTree(load("cancer-data-train.csv"))
+
+def doLDA(dataset):
+    X,y = dataset
+    testX,testY=load("cancer-data-test.csv")
+    clf = LDA()
+    clf.fit(X,y)
+    avg = 0
+    i = 0
+
+    for score in (cross_val_score(clf, X, y, cv=10, scoring='f1_macro')):
+        avg += score
+        i += 1
+    score=avg/i
+
+    return score
+
+def classify(dataset):
+    ##
+    ## 1: Training the data with the best SVM parameters (c=.1
+    X,y = dataset
+    testX,testY = load("cancer-data-test.csv")
+    metrics = ('Avg Precision','Avg Recall','Avg F-Measure')
+
+    classify_svm  = svm.SVC(kernel='linear',C=.1)
+    classify_svm.fit(X,y)
+    predict_svm   = classify_svm.predict(testX)
+    precision_svm = average_precision_score(testY,predict_svm)
+    confusion_svm = confusion_matrix(testY,predict_svm)
+    f1_svm        = f1_score(testY,predict_svm)
+    recall_svm    = recall_score(testY,predict_svm)
+
+    metrics_svm=[precision_svm,recall_svm,f1_svm]
+    print(precision_svm,recall_svm,confusion_svm,f1_svm)
+
+    plot_svm = plt
+    plot_svm.bar(metrics,metrics_svm)
+    plot_svm.xlabel('Metrics')
+    plot_svm.ylabel('Values')
+    plot_svm.show()
+classify(load("cancer-data-train.csv"))
